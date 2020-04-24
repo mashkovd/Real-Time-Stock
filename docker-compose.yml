@@ -1,0 +1,42 @@
+version: "3"
+services:
+#  nginx:
+#    image: nginx:latest
+##    container_name: ng01
+##    ports:
+##      - "80:5000"
+#    volumes:
+#      - ./config/nginx:/etc/nginx/conf.d
+#    depends_on:
+#      - dash-app
+  redis:
+    image: "redis:alpine"
+#    ports:
+#      - "6379:6379"
+    volumes:
+      - ./config/redis/data:/data
+      - ./config/redis/redis.conf:/usr/local/etc/redis.conf
+    command: redis-server /usr/local/etc/redis.conf
+
+  data:
+    env_file:
+      - ./.env
+    build:
+      context: .
+      dockerfile: docker/data/Dockerfile
+    depends_on:
+      - redis
+    volumes:
+      - ./docker/data:/code
+  dash-app:
+    env_file:
+      - ./.env
+    build:
+      context: .
+      dockerfile: ./docker/dash_app/Dockerfile
+    depends_on:
+      - redis
+    volumes:
+      - ./docker/dash_app:/code
+    ports:
+      - "5000:5000"
